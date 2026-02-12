@@ -168,7 +168,7 @@
     <div class="container" id="mainScreen">
         <h1>💖 Важный вопрос 💖</h1>
         <div class="question">
-            Привет!<br>Ты станешь моей валентинкой?
+            <br>Ты станешь моей валентинкой?
         </div>
         <div class="buttons">
             <button class="yes" id="yesBtn">ДА! 💘</button>
@@ -360,7 +360,6 @@
             }
             if (clickCount === 4) {
                 noBtn.textContent = 'Нажми ДА! 💖';
-                noBtn.style.background = '#4CAF50';
             }
 
             // Находим безопасную позицию и перемещаем
@@ -390,7 +389,7 @@
         // ===== КНОПКА "ДА" =====
         yesBtn.addEventListener('click', function() {
             // Убеждаемся что фото загружается
-            photo.src = '1.jpg';
+            photo.src = '1.JPG';
             
             mainScreen.style.display = 'none';
             resultScreen.style.display = 'block';
@@ -432,4 +431,5 @@
     </script>
 </body>
 </html>
+
 
