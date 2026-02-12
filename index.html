@@ -79,7 +79,7 @@
             border: 3px solid white;
             position: absolute;
             z-index: 5;
-            transition: all 0.25s ease-out;
+            transition: left 0.3s ease, top 0.3s ease;
             white-space: nowrap;
         }
         .no-hidden-text {
@@ -138,7 +138,6 @@
 
     <div class="container result" id="resultScreen">
         <h1>🎉 Ура! 🎉</h1>
-        <!-- ⚡ ИСПРАВЛЕНО: JPG → jpg -->
         <img class="photo" id="photo" src="1.jpg">
         <div class="congrats">
             Ты — моя валентинка! 💌
@@ -146,6 +145,7 @@
     </div>
 
     <script>
+        // Сбрасываем все настройки
         localStorage.clear();
         sessionStorage.clear();
 
@@ -158,9 +158,10 @@
         let clickCount = 0;
         const maxClicks = 5;
 
-        // ⚡ ИСПРАВЛЕНО: JPG → jpg
-        const myPhotos = ['1.JPG', '2.JPG'];
+        // ===== ТВОИ ФОТО =====
+        const myPhotos = ['1.jpg', '2.jpg', '1.jpg'];
 
+        // ===== ФУНКЦИЯ ДЛЯ БЕЗОПАСНОЙ ПОЗИЦИИ =====
         function getSafePosition() {
             const container = document.querySelector('.buttons');
             const containerRect = container.getBoundingClientRect();
@@ -182,6 +183,7 @@
 
             let possiblePositions = [];
 
+            // ЗОНА СЛЕВА
             if (leftZoneWidth >= noWidth) {
                 const minX = 0;
                 const maxX = yesLeft - noWidth - 10;
@@ -195,6 +197,7 @@
                 }
             }
 
+            // ЗОНА СПРАВА
             if (rightZoneWidth >= noWidth) {
                 const minX = yesRight + 10;
                 const maxX = containerRect.width - noWidth;
@@ -208,6 +211,7 @@
                 }
             }
 
+            // ЗОНА СВЕРХУ
             if (topZoneHeight >= noHeight) {
                 const minX = 0;
                 const maxX = containerRect.width - noWidth;
@@ -221,6 +225,7 @@
                 }
             }
 
+            // ЗОНА СНИЗУ
             if (bottomZoneHeight >= noHeight) {
                 const minX = 0;
                 const maxX = containerRect.width - noWidth;
@@ -240,6 +245,7 @@
             return null;
         }
 
+        // ===== ДВИЖЕНИЕ КНОПКИ "НЕТ" ТОЛЬКО ПО НАЖАТИЮ =====
         function moveButton() {
             clickCount++;
             
@@ -249,30 +255,47 @@
                 return;
             }
 
-            if (clickCount === 2) noBtn.textContent = 'Не нажимай! 😅';
-            if (clickCount === 3) noBtn.textContent = 'Подумай ещё! 💭';
+            // Меняем текст и цвет при приближении
+            if (clickCount === 2) {
+                noBtn.textContent = 'Не нажимай! 😅';
+            }
+            if (clickCount === 3) {
+                noBtn.textContent = 'Подумай ещё! 💭';
+            }
             if (clickCount === 4) {
                 noBtn.textContent = 'Нажми ДА! 💖';
                 noBtn.style.background = '#4CAF50';
             }
 
-            setTimeout(() => {
-                const position = getSafePosition();
-                if (position) {
-                    noBtn.style.left = position.x + 'px';
-                    noBtn.style.top = position.y + 'px';
-                } else {
-                    noBtn.style.display = 'none';
-                    noMessage.style.display = 'block';
-                    clickCount = maxClicks;
-                }
-            }, 10);
+            // Находим безопасную позицию и перемещаем
+            const position = getSafePosition();
+            if (position) {
+                noBtn.style.left = position.x + 'px';
+                noBtn.style.top = position.y + 'px';
+            } else {
+                // Если нет места — кнопка исчезает
+                noBtn.style.display = 'none';
+                noMessage.style.display = 'block';
+                clickCount = maxClicks;
+            }
         }
 
-        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveButton(); });
-        noBtn.addEventListener('mouseover', (e) => { if (window.matchMedia("(pointer: fine)").matches) moveButton(); });
-        noBtn.addEventListener('click', (e) => { e.preventDefault(); moveButton(); });
+        // ===== УБИРАЕМ ВСЕ СОБЫТИЯ НАВЕДЕНИЯ =====
+        // Удаляем mouseover — теперь кнопка двигается ТОЛЬКО по клику!
 
+        // ===== ТОЛЬКО НАЖАТИЯ (для телефона и компьютера) =====
+        noBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            moveButton();
+        });
+
+        // Для телефона — touchstart срабатывает быстрее click
+        noBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            moveButton();
+        });
+
+        // ===== КНОПКА "ДА" =====
         yesBtn.addEventListener('click', function() {
             const randomPhoto = myPhotos[Math.floor(Math.random() * myPhotos.length)];
             document.getElementById('photo').src = randomPhoto;
@@ -280,6 +303,7 @@
             resultScreen.style.display = 'block';
         });
 
+        // ===== СТАРТОВАЯ ПОЗИЦИЯ =====
         window.addEventListener('load', function() {
             setTimeout(() => {
                 const position = getSafePosition();
@@ -295,6 +319,17 @@
                 }
                 noBtn.style.position = 'absolute';
             }, 50);
+        });
+
+        // При изменении размера окна перемещаем в безопасное место
+        window.addEventListener('resize', function() {
+            if (noBtn.style.display !== 'none' && clickCount < maxClicks) {
+                const position = getSafePosition();
+                if (position) {
+                    noBtn.style.left = position.x + 'px';
+                    noBtn.style.top = position.y + 'px';
+                }
+            }
         });
     </script>
 </body>
