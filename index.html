@@ -159,7 +159,7 @@
         const maxClicks = 5;
 
         // ===== ТВОИ ФОТО =====
-        const myPhotos = ['1.jpg', '2.jpg', '1.jpg'];
+        const myPhotos = ['1.jpg'];
 
         // ===== ФУНКЦИЯ ДЛЯ БЕЗОПАСНОЙ ПОЗИЦИИ =====
         function getSafePosition() {
@@ -257,10 +257,10 @@
 
             // Меняем текст и цвет при приближении
             if (clickCount === 2) {
-                noBtn.textContent = 'Не нажимай! 😅';
+                noBtn.textContent = 'Не нажимай!';
             }
             if (clickCount === 3) {
-                noBtn.textContent = 'Подумай ещё! 💭';
+                noBtn.textContent = 'Подумай ещё!';
             }
             if (clickCount === 4) {
                 noBtn.textContent = 'Нажми ДА! 💖';
@@ -334,3 +334,4 @@
     </script>
 </body>
 </html>
+
