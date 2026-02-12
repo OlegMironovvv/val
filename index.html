@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>💖 Для тебя</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            padding: 15px;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 20px;
+            border-radius: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #d63384;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .buttons {
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .yes {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.8rem;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(76,175,80,0.4);
+            border: 3px solid white;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+            max-width: 80%;
+            word-break: break-word;
+        }
+        .no {
+            background: #ff416c;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.8rem;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255,65,108,0.4);
+            border: 3px solid white;
+            position: absolute;
+            z-index: 5;
+            transition: all 0.25s ease-out;
+            white-space: nowrap;
+        }
+        .no-hidden-text {
+            display: none;
+            font-size: 1.8rem;
+            color: #d63384;
+            font-weight: bold;
+            margin-top: 20px;
+            animation: bounce 0.6s;
+        }
+        .result {
+            display: none;
+        }
+        .photo {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 30px;
+            margin: 20px auto;
+            border: 5px solid white;
+        }
+        .congrats {
+            font-size: 2.2rem;
+            color: #d63384;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        @keyframes bounce {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .question { font-size: 1.2rem; }
+            .yes, .no { padding: 15px 30px; font-size: 1.5rem; }
+            .buttons { min-height: 160px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainScreen">
+        <h1>💖 Важный вопрос 💖</h1>
+        <div class="question">
+            Привет!<br>Ты станешь моей валентинкой?
+        </div>
+        <div class="buttons">
+            <button class="yes" id="yesBtn">ДА! 💘</button>
+            <button class="no" id="noBtn">Нет</button>
+        </div>
+        <div class="no-hidden-text" id="noMessage">
+            😏 Ты правда думала, что есть выбор?
+        </div>
+    </div>
+
+    <div class="container result" id="resultScreen">
+        <h1>🎉 Ура! 🎉</h1>
+        <!-- ⚡ ФОТО ТЕПЕРЬ С ВАШЕГО САЙТА - МГНОВЕННАЯ ЗАГРУЗКА! -->
+        <img class="photo" id="photo" src="1.jpg">
+        <div class="congrats">
+            Ты — моя валентинка! 💌
+        </div>
+    </div>
+
+    <script>
+        localStorage.clear();
+        sessionStorage.clear();
+
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const noMessage = document.getElementById('noMessage');
+        const mainScreen = document.getElementById('mainScreen');
+        const resultScreen = document.getElementById('resultScreen');
+
+        let clickCount = 0;
+        const maxClicks = 5;
+
+        // ===== ФОТО ТЕПЕРЬ ЛЕЖАТ РЯДОМ С САЙТОМ =====
+        const myPhotos = [
+            '1.jpg',
+            '2.jpg',
+            '1.jpg'  // можно добавить третье фото
+        ];
+
+        function getSafePosition() {
+            const container = document.querySelector('.buttons');
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+            const yesBtnRect = yesBtn.getBoundingClientRect();
+
+            const yesLeft = yesBtnRect.left - containerRect.left;
+            const yesRight = yesLeft + yesBtnRect.width;
+            const yesTop = yesBtnRect.top - containerRect.top;
+            const yesBottom = yesTop + yesBtnRect.height;
+
+            const leftZoneWidth = Math.max(0, yesLeft - 10);
+            const rightZoneWidth = Math.max(0, containerRect.width - yesRight - 10);
+            const topZoneHeight = Math.max(0, yesTop - 10);
+            const bottomZoneHeight = Math.max(0, containerRect.height - yesBottom - 10);
+
+            const noWidth = btnRect.width;
+            const noHeight = btnRect.height;
+
+            let possiblePositions = [];
+
+            if (leftZoneWidth >= noWidth) {
+                const minX = 0;
+                const maxX = yesLeft - noWidth - 10;
+                const minY = 0;
+                const maxY = containerRect.height - noHeight;
+                if (maxX >= minX && maxY >= minY) {
+                    possiblePositions.push({
+                        x: Math.random() * (maxX - minX) + minX,
+                        y: Math.random() * (maxY - minY) + minY
+                    });
+                }
+            }
+
+            if (rightZoneWidth >= noWidth) {
+                const minX = yesRight + 10;
+                const maxX = containerRect.width - noWidth;
+                const minY = 0;
+                const maxY = containerRect.height - noHeight;
+                if (maxX >= minX && maxY >= minY) {
+                    possiblePositions.push({
+                        x: Math.random() * (maxX - minX) + minX,
+                        y: Math.random() * (maxY - minY) + minY
+                    });
+                }
+            }
+
+            if (topZoneHeight >= noHeight) {
+                const minX = 0;
+                const maxX = containerRect.width - noWidth;
+                const minY = 0;
+                const maxY = yesTop - noHeight - 10;
+                if (maxY >= minY && maxX >= minX) {
+                    possiblePositions.push({
+                        x: Math.random() * (maxX - minX) + minX,
+                        y: Math.random() * (maxY - minY) + minY
+                    });
+                }
+            }
+
+            if (bottomZoneHeight >= noHeight) {
+                const minX = 0;
+                const maxX = containerRect.width - noWidth;
+                const minY = yesBottom + 10;
+                const maxY = containerRect.height - noHeight;
+                if (maxY >= minY && maxX >= minX) {
+                    possiblePositions.push({
+                        x: Math.random() * (maxX - minX) + minX,
+                        y: Math.random() * (maxY - minY) + minY
+                    });
+                }
+            }
+
+            if (possiblePositions.length > 0) {
+                return possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+            }
+            return null;
+        }
+
+        function moveButton() {
+            clickCount++;
+            
+            if (clickCount >= maxClicks) {
+                noBtn.style.display = 'none';
+                noMessage.style.display = 'block';
+                return;
+            }
+
+            if (clickCount === 2) noBtn.textContent = 'Не нажимай! 😅';
+            if (clickCount === 3) noBtn.textContent = 'Подумай ещё! 💭';
+            if (clickCount === 4) {
+                noBtn.textContent = 'Нажми ДА! 💖';
+                noBtn.style.background = '#4CAF50';
+            }
+
+            setTimeout(() => {
+                const position = getSafePosition();
+                if (position) {
+                    noBtn.style.left = position.x + 'px';
+                    noBtn.style.top = position.y + 'px';
+                } else {
+                    noBtn.style.display = 'none';
+                    noMessage.style.display = 'block';
+                    clickCount = maxClicks;
+                }
+            }, 10);
+        }
+
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveButton(); });
+        noBtn.addEventListener('mouseover', (e) => { if (window.matchMedia("(pointer: fine)").matches) moveButton(); });
+        noBtn.addEventListener('click', (e) => { e.preventDefault(); moveButton(); });
+
+        yesBtn.addEventListener('click', function() {
+            const randomPhoto = myPhotos[Math.floor(Math.random() * myPhotos.length)];
+            document.getElementById('photo').src = randomPhoto;
+            mainScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+        });
+
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const position = getSafePosition();
+                if (position) {
+                    noBtn.style.left = position.x + 'px';
+                    noBtn.style.top = position.y + 'px';
+                } else {
+                    const container = document.querySelector('.buttons');
+                    const containerRect = container.getBoundingClientRect();
+                    const btnRect = noBtn.getBoundingClientRect();
+                    noBtn.style.left = (containerRect.width - btnRect.width - 20) + 'px';
+                    noBtn.style.top = '0px';
+                }
+                noBtn.style.position = 'absolute';
+            }, 50);
+        });
+    </script>
+</body>
+</html>
