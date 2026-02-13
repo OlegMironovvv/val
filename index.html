@@ -110,10 +110,11 @@
             cursor: pointer;
             box-shadow: 0 10px 25px rgba(255,65,108,0.4);
             border: 3px solid white;
-            position: absolute;
+            position: relative; /* Изменено с absolute на relative */
             z-index: 5;
-            transition: left 0.3s ease, top 0.3s ease, background 0.3s ease;
+            transition: background 0.3s ease;
             white-space: nowrap;
+            margin-left: 20px; /* Отступ от кнопки ДА */
         }
         .no-hidden-text {
             display: none;
@@ -158,6 +159,7 @@
             .question { font-size: 1.2rem; }
             .yes, .no { padding: 15px 30px; font-size: 1.5rem; }
             .buttons { min-height: 160px; }
+            .no { margin-left: 15px; }
         }
     </style>
 </head>
@@ -182,7 +184,7 @@
     <div class="container result" id="resultScreen">
         <h1>🎉 Ура! 🎉</h1>
         <!-- ===== ТОЛЬКО ОДНО ФОТО - 1.jpg ===== -->
-        <img class="photo" id="photo" src="1.jpg">
+        <img class="photo" id="photo" src="1.JPG">
         <div class="congrats">
             Ты — моя валентинка! 💌
         </div>
@@ -257,92 +259,9 @@
         // Просто убеждаемся, что фото загружается правильно
         photo.src = '1.JPG';
 
-        // ===== ФУНКЦИЯ ДЛЯ БЕЗОПАСНОЙ ПОЗИЦИИ =====
-        function getSafePosition() {
-            const container = document.querySelector('.buttons');
-            const containerRect = container.getBoundingClientRect();
-            const btnRect = noBtn.getBoundingClientRect();
-            const yesBtnRect = yesBtn.getBoundingClientRect();
-
-            const yesLeft = yesBtnRect.left - containerRect.left;
-            const yesRight = yesLeft + yesBtnRect.width;
-            const yesTop = yesBtnRect.top - containerRect.top;
-            const yesBottom = yesTop + yesBtnRect.height;
-
-            const leftZoneWidth = Math.max(0, yesLeft - 10);
-            const rightZoneWidth = Math.max(0, containerRect.width - yesRight - 10);
-            const topZoneHeight = Math.max(0, yesTop - 10);
-            const bottomZoneHeight = Math.max(0, containerRect.height - yesBottom - 10);
-
-            const noWidth = btnRect.width;
-            const noHeight = btnRect.height;
-
-            let possiblePositions = [];
-
-            // ЗОНА СЛЕВА
-            if (leftZoneWidth >= noWidth) {
-                const minX = 0;
-                const maxX = yesLeft - noWidth - 10;
-                const minY = 0;
-                const maxY = containerRect.height - noHeight;
-                if (maxX >= minX && maxY >= minY) {
-                    possiblePositions.push({
-                        x: Math.random() * (maxX - minX) + minX,
-                        y: Math.random() * (maxY - minY) + minY
-                    });
-                }
-            }
-
-            // ЗОНА СПРАВА
-            if (rightZoneWidth >= noWidth) {
-                const minX = yesRight + 10;
-                const maxX = containerRect.width - noWidth;
-                const minY = 0;
-                const maxY = containerRect.height - noHeight;
-                if (maxX >= minX && maxY >= minY) {
-                    possiblePositions.push({
-                        x: Math.random() * (maxX - minX) + minX,
-                        y: Math.random() * (maxY - minY) + minY
-                    });
-                }
-            }
-
-            // ЗОНА СВЕРХУ
-            if (topZoneHeight >= noHeight) {
-                const minX = 0;
-                const maxX = containerRect.width - noWidth;
-                const minY = 0;
-                const maxY = yesTop - noHeight - 10;
-                if (maxY >= minY && maxX >= minX) {
-                    possiblePositions.push({
-                        x: Math.random() * (maxX - minX) + minX,
-                        y: Math.random() * (maxY - minY) + minY
-                    });
-                }
-            }
-
-            // ЗОНА СНИЗУ
-            if (bottomZoneHeight >= noHeight) {
-                const minX = 0;
-                const maxX = containerRect.width - noWidth;
-                const minY = yesBottom + 10;
-                const maxY = containerRect.height - noHeight;
-                if (maxY >= minY && maxX >= minX) {
-                    possiblePositions.push({
-                        x: Math.random() * (maxX - minX) + minX,
-                        y: Math.random() * (maxY - minY) + minY
-                    });
-                }
-            }
-
-            if (possiblePositions.length > 0) {
-                return possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
-            }
-            return null;
-        }
-
-        // ===== ДВИЖЕНИЕ КНОПКИ "НЕТ" ТОЛЬКО ПО НАЖАТИЮ =====
-        function moveButton() {
+        // ===== КНОПКА "НЕТ" БОЛЬШЕ НЕ ДВИГАЕТСЯ! =====
+        // Только меняет текст и исчезает после 5 нажатий
+        function handleNoClick() {
             clickCount++;
             
             if (clickCount >= maxClicks) {
@@ -351,39 +270,30 @@
                 return;
             }
 
-            // Меняем текст и цвет при приближении
+            // Меняем текст при каждом нажатии
+            if (clickCount === 1) {
+                noBtn.textContent = 'Нет';
+            }
             if (clickCount === 2) {
-                noBtn.textContent = 'Не нажимай! ';
+                noBtn.textContent = 'Не нажимай!';
             }
             if (clickCount === 3) {
-                noBtn.textContent = 'Подумай ещё! ';
+                noBtn.textContent = 'Подумай ещё!';
             }
             if (clickCount === 4) {
-                noBtn.textContent = 'Нажми ДА! 💖';
-            }
-
-            // Находим безопасную позицию и перемещаем
-            const position = getSafePosition();
-            if (position) {
-                noBtn.style.left = position.x + 'px';
-                noBtn.style.top = position.y + 'px';
-            } else {
-                // Если нет места — кнопка исчезает
-                noBtn.style.display = 'none';
-                noMessage.style.display = 'block';
-                clickCount = maxClicks;
+                noBtn.textContent = 'Другая кнопка!';
             }
         }
 
         // ===== ТОЛЬКО НАЖАТИЯ (для телефона и компьютера) =====
         noBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            moveButton();
+            handleNoClick();
         });
 
         noBtn.addEventListener('touchstart', function(e) {
             e.preventDefault();
-            moveButton();
+            handleNoClick();
         });
 
         // ===== КНОПКА "ДА" =====
@@ -400,36 +310,16 @@
             }
         });
 
-        // ===== СТАРТОВАЯ ПОЗИЦИЯ =====
+        // ===== УБИРАЕМ ВЕСЬ КОД ПЕРЕМЕЩЕНИЯ =====
+        // Функция getSafePosition больше не нужна
+        // Все события resize и load для перемещения удалены
+        
+        // Просто устанавливаем начальное положение
         window.addEventListener('load', function() {
-            setTimeout(() => {
-                const position = getSafePosition();
-                if (position) {
-                    noBtn.style.left = position.x + 'px';
-                    noBtn.style.top = position.y + 'px';
-                } else {
-                    const container = document.querySelector('.buttons');
-                    const containerRect = container.getBoundingClientRect();
-                    const btnRect = noBtn.getBoundingClientRect();
-                    noBtn.style.left = (containerRect.width - btnRect.width - 20) + 'px';
-                    noBtn.style.top = '0px';
-                }
-                noBtn.style.position = 'absolute';
-            }, 50);
-        });
-
-        // При изменении размера окна перемещаем в безопасное место
-        window.addEventListener('resize', function() {
-            if (noBtn.style.display !== 'none' && clickCount < maxClicks) {
-                const position = getSafePosition();
-                if (position) {
-                    noBtn.style.left = position.x + 'px';
-                    noBtn.style.top = position.y + 'px';
-                }
-            }
+            noBtn.style.position = 'relative';
+            noBtn.style.left = 'auto';
+            noBtn.style.top = 'auto';
         });
     </script>
 </body>
 </html>
-
-
